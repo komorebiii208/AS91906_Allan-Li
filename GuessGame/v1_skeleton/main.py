@@ -1,8 +1,9 @@
-"""This is the GUI for the Guess Game. """
+"""This is the GUI for the Guess Game (MainMenu). """
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
+from game import Game
 
 
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -13,12 +14,17 @@ class GuessGameApp:
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.geometry("1024x768")
+        self.root.geometry("800x600")
         self.root.title("Guess Game")
 
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=0)
         self.root.rowconfigure(1, weight=1)
+
+
+        self.latest_game_score = 0
+        self.root.update_user_score = self.update_user_score
+
 
         # --- Window icon ---
         icon_path = os.path.join(base_path,"image", "icon.ico")
@@ -30,6 +36,7 @@ class GuessGameApp:
         self.current_page = None
         self.show_page(MainMenu)
 
+
     def show_page(self, page_class):
         """changing page function"""
 
@@ -38,9 +45,11 @@ class GuessGameApp:
         self.current_page = page_class(self.root, self.show_page)
         self.current_page.grid(row=1, column=0, sticky="nsew")
 
+
     def run(self):
         """Running the program"""
         self.root.mainloop()
+
 
     def navigationbar(self):
         """ Navigation Bar (always on top of the page)"""
@@ -111,6 +120,13 @@ class GuessGameApp:
         ).pack(side="left", ipady=5, padx=10)
 
 
+    def update_user_score(self, score):
+        """update the score"""
+        self.latest_game_score = score
+        self.root.latest_game_score = score
+        self.show_page(Account)
+
+
 class MainMenu(tk.Frame):
     """ Main Page of the project (Menu) """
 
@@ -124,6 +140,14 @@ class MainMenu(tk.Frame):
             self.grid_rowconfigure(row, weight=1)
         for column in range(3):
             self.grid_columnconfigure(column, weight=1)
+
+
+    def start_independent_game(self):
+        """Pop up the game window and hide the main one"""
+        main_root = self.master
+        main_root.withdraw()
+
+        game_window = Game(main_root)
 
 
     def build_page(self):
@@ -140,109 +164,48 @@ class MainMenu(tk.Frame):
     def game_card(self):
         """Add game cards to the main content area"""
 
-        # Row 1, Column 0, 1, 2 - Game cards
-        # Game card 1 (Row1, Column0)
-        card1 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card1.grid(row=1, column=0, padx=40, pady=40, sticky="nsew")
+        game_data=[
+            {"id":1, "title":"1", "cover_colour":"#1a6fa1"},
+            {"id":2, "title":"2", "cover_colour":"#1a6fa1"},
+            {"id":3, "title":"3", "cover_colour":"#1a6fa1"},
+            {"id":4, "title":"4", "cover_colour":"#1a6fa1"},
+            {"id":5, "title":"5", "cover_colour":"#1a6fa1"},
+            {"id":6, "title":"6", "cover_colour":"#1a6fa1"},
+        ]
 
-        cover1 = tk.Frame(card1, bg="#1a6fa1", height=60)
-        cover1.pack(side="top", fill="x")
+        cards_per_row = 3
 
-        title1 = tk.Label(card1, text="1", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title1.pack(side="top", fill="x", padx=10, pady=(10, 2))
+        for index, data in enumerate(game_data):
 
-        type1 = tk.Label(card1, text="1", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type1.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn1 = tk.Button(card1, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn1.pack(side="bottom", fill="x", padx=10, pady=10)
-
-
-        # Game card 2 (Row1, Column1)
-        card2 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card2.grid(row=1, column=1, padx=40, pady=40, sticky="nsew")
-
-        cover2 = tk.Frame(card2, bg="#1a6fa1", height=60)
-        cover2.pack(side="top", fill="x")
-
-        title2 = tk.Label(card2, text="2", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title2.pack(side="top", fill="x", padx=10, pady=(10, 2))
-
-        type2 = tk.Label(card2, text="2", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type2.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn2 = tk.Button(card2, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn2.pack(side="bottom", fill="x", padx=10, pady=10)
+            row = (index // cards_per_row) + 1
+            column = index % cards_per_row
 
 
-        # Game card 3 (Row1, Column2)
-        card3 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card3.grid(row=1, column=2, padx=40, pady=40, sticky="nsew")
+            card = tk.Frame(self, bg="white", bd=1, relief="solid")
+            card.grid(row=row, column=column, padx=40, pady=40, sticky="nsew")
 
-        cover3 = tk.Frame(card3, bg="#1a6fa1", height=60)
-        cover3.pack(side="top", fill="x")
+            cover = tk.Frame(card, bg=data["cover_colour"], height=60)
+            cover.pack(side="top", fill="x")
 
-        title3 = tk.Label(card3, text="3", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title3.pack(side="top", fill="x", padx=10, pady=(10, 2))
+            title = tk.Label(
+                card,
+                text=data["title"],
+                font=("Arial", 14, "bold"),
+                bg="white",
+                anchor="w"
+            )
+            title.pack(side="top", fill="x", padx=10, pady=(10, 2))
 
-        type3 = tk.Label(card3, text="3", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type3.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn3 = tk.Button(card3, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn3.pack(side="bottom", fill="x", padx=10, pady=10)
-
-
-
-        # Row 2, Column 0, 1, 2 - Game cards
-        # Game card 4
-        card4 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card4.grid(row=2, column=0, padx=40, pady=40, sticky="nsew")
-
-        cover4 = tk.Frame(card4, bg="#1a6fa1", height=60)
-        cover4.pack(side="top", fill="x")
-
-        title4 = tk.Label(card4, text="4", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title4.pack(side="top", fill="x", padx=10, pady=(10, 2))
-
-        type4 = tk.Label(card4, text="4", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type4.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn4 = tk.Button(card4, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn4.pack(side="bottom", fill="x", padx=10, pady=10)
-
-
-        # Game card 5
-        card5 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card5.grid(row=2, column=1, padx=40, pady=40, sticky="nsew")
-
-        cover5 = tk.Frame(card5, bg="#1a6fa1", height=60)
-        cover5.pack(side="top", fill="x")
-
-        title5 = tk.Label(card5, text="5", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title5.pack(side="top", fill="x", padx=10, pady=(10, 2))
-
-        type5 = tk.Label(card5, text="5", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type5.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn5 = tk.Button(card5, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn5.pack(side="bottom", fill="x", padx=10, pady=10)
-
-
-        # Game card 6
-        card6 = tk.Frame(self, bg="white", bd=1, relief="solid")
-        card6.grid(row=2, column=2, padx=40, pady=40, sticky="nsew")
-
-        cover6 = tk.Frame(card6, bg="#1a6fa1", height=60)
-        cover6.pack(side="top", fill="x")
-
-        title6 = tk.Label(card6, text="6", font=("Arial", 14, "bold"), bg="white", anchor="w")
-        title6.pack(side="top", fill="x", padx=10, pady=(10, 2))
-
-        type6 = tk.Label(card6, text="6", font=("Arial", 10), fg="gray", bg="white", anchor="w")
-        type6.pack(side="top", fill="x", padx=10, pady=(0, 10))
-
-        play_btn6 = tk.Button(card6, text="Start", bg="#3b7799", fg="white", font=("Arial", 11, "bold"), bd=0)
-        play_btn6.pack(side="bottom", fill="x", padx=10, pady=10)
+            play_button = tk.Button(
+                card,
+                text="Start",
+                bg="#3b7799",
+                fg="white",
+                font=("Arial", 11, "bold"),
+                bd=0,
+                command=self.start_independent_game
+            )
+            play_button.pack(side="bottom", fill="x", padx=10, pady=10)
 
 
 
@@ -279,6 +242,7 @@ class Login(tk.Frame):
             bd=0,
             relief="solid",
         ).grid(row=1, column=1, padx=20, pady=20, sticky="w")
+
 
     def password(self):
         "Ask user to set a password"
@@ -327,16 +291,18 @@ class Account(tk.Frame):
 
     def __init__(self, root, show_page):
         super().__init__(root)
+        self.root= root
         self.show_page = show_page
         self.user_name()
         self.highest_score()
         self.total_score()
+        self.show_latest_score()
 
 
         self.grid_columnconfigure(0, weight=10)
         self.grid_columnconfigure(1, weight=10)
         self.grid_rowconfigure(0, weight=2)
-        self.grid_rowconfigure(4, weight=2)
+        self.grid_rowconfigure(5, weight=2)
 
 
     def user_name(self):
@@ -394,6 +360,29 @@ class Account(tk.Frame):
             bg="#ecf0f1",
             fg="#2c3e50",
         ).grid(row=3, column=1, padx=20, pady=20, sticky="w")
+
+
+    def show_latest_score(self):
+        """Show last game score"""
+
+        tk.Label(
+            self,
+            text="Score in last game:",
+            font=("Arial", 18),
+            bg="#ecf0f1",
+            fg="#2c3e50", # 换个显眼的橙色
+        ).grid(row=4, column=0, padx=20, pady=20, sticky="e")
+
+        current_score = getattr(self.root, 'latest_game_score', 0)
+
+        tk.Label(
+            self,
+            text=f"{current_score}",
+            font=("Arial", 18, "bold"),
+            bg="#ecf0f1",
+            fg="#2c3e50",
+        ).grid(row=4, column=1, padx=20, pady=20, sticky="w")
+
 
 
 if __name__ == "__main__":
