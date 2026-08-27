@@ -23,7 +23,7 @@ DARK     = "#2c3e50"
 DB       = "#34495e"
 BLUE     = "#1368ce"
 WHITE    = "#ffffff"
-
+HIGHLIGHT_BG = "#C4F3FF"
 
 
 # ═══ APP ═════════════════════════════════════════════════════════
@@ -487,24 +487,35 @@ class Account(tk.Frame):
 
 
     def show_latest_score(self):
-        """Show last game score"""
+        """Display the latest game score in a card-like frame"""
+
+        card_frame = tk.Frame(
+            self,
+            bg=HIGHLIGHT_BG,
+            bd=2,
+            relief="solid",
+            padx=15,
+            pady=10
+        )
+        card_frame.grid(row=4, column=0, columnspan=2, padx=20, pady=20, sticky="ew")
+
+        score = self.app.latest_game_score if self.app else 0
 
         tk.Label(
-            self,
+            card_frame,
             text="Score in last game:",
-            font=("Arial", 18),
-            bg=BG,
-            fg=DARK,
-        ).grid(row=4, column=0, padx=20, pady=20, sticky="e")
+            font=("Arial", 16, "bold"),
+            bg=HIGHLIGHT_BG,
+            fg=BLUE
+        ).pack(side="left", padx=5)
 
-        latest_game_score = self.app.latest_game_score if self.app else 0
         tk.Label(
-            self,
-            text=latest_game_score,
-            font=("Arial", 18, "bold"),
-            bg=BG,
-            fg=DARK,
-        ).grid(row=4, column=1, padx=20, pady=20, sticky="w")
+            card_frame,
+            text=str(score),
+            font=("Arial", 20, "bold"),
+            bg=HIGHLIGHT_BG,
+            fg="#3A2FD3"
+        ).pack(side="right", padx=5)
 
 
 
